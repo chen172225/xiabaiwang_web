@@ -1,0 +1,508 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f2eadb" />
+  <title>瞎掰王 · 随机词语</title>
+  <style>
+    :root {
+      --ink: #18201d;
+      --muted: #68706b;
+      --paper: #f6f0e4;
+      --paper-2: #eee4d2;
+      --accent: #d84c35;
+      --accent-dark: #a92e20;
+      --green: #1e5a46;
+      --line: rgba(24, 32, 29, .15);
+      --shadow: 0 28px 70px rgba(51, 38, 22, .18), 0 8px 24px rgba(51, 38, 22, .10);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { min-height: 100%; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: ui-serif, "Songti SC", "STSong", "Noto Serif CJK SC", serif;
+      background:
+        radial-gradient(circle at 14% 12%, rgba(216, 76, 53, .12), transparent 26rem),
+        radial-gradient(circle at 88% 88%, rgba(30, 90, 70, .12), transparent 30rem),
+        repeating-linear-gradient(0deg, rgba(65, 49, 30, .022) 0, rgba(65, 49, 30, .022) 1px, transparent 1px, transparent 4px),
+        var(--paper);
+      display: grid;
+      place-items: center;
+      padding: max(24px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom));
+      overflow-x: hidden;
+    }
+
+    .shell {
+      width: min(720px, 100%);
+      display: grid;
+      gap: 20px;
+    }
+
+    header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 0 6px;
+    }
+
+    .brand { display: grid; gap: 4px; }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(25px, 5vw, 38px);
+      line-height: 1;
+      letter-spacing: .08em;
+      font-weight: 900;
+    }
+
+    .subtitle, .count {
+      margin: 0;
+      color: var(--muted);
+      font-family: ui-sans-serif, system-ui, -apple-system, "PingFang SC", sans-serif;
+      font-size: 13px;
+      letter-spacing: .04em;
+    }
+
+    .count {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 7px 11px;
+      white-space: nowrap;
+      background: rgba(255,255,255,.32);
+    }
+
+    .stage { perspective: 1400px; }
+
+    .card {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      min-height: 390px;
+      max-height: 580px;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform .62s cubic-bezier(.2,.72,.2,1);
+      cursor: pointer;
+      outline: none;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    .card.is-flipped { transform: rotateY(180deg); }
+
+    .card:focus-visible .face {
+      box-shadow: var(--shadow), 0 0 0 4px rgba(216, 76, 53, .26);
+    }
+
+    .face {
+      position: absolute;
+      inset: 0;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      border-radius: 26px;
+      border: 1px solid rgba(65, 49, 30, .17);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      display: grid;
+      place-items: center;
+      padding: clamp(30px, 7vw, 64px);
+      text-align: center;
+    }
+
+    .face::before {
+      content: "";
+      position: absolute;
+      inset: 14px;
+      border: 1px solid rgba(65, 49, 30, .22);
+      border-radius: 17px;
+      pointer-events: none;
+    }
+
+    .face::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      opacity: .3;
+      pointer-events: none;
+      background: repeating-linear-gradient(92deg, transparent 0 7px, rgba(82,59,32,.035) 7px 8px);
+    }
+
+    .front {
+      background:
+        radial-gradient(circle at 50% 44%, rgba(255,255,255,.68), transparent 45%),
+        var(--paper-2);
+    }
+
+    .back {
+      transform: rotateY(180deg);
+      color: #f7f1e5;
+      background:
+        radial-gradient(circle at 50% 38%, rgba(255,255,255,.075), transparent 43%),
+        var(--green);
+      border-color: rgba(255,255,255,.18);
+    }
+
+    .back::before { border-color: rgba(255,255,255,.28); }
+
+    .face-content {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      justify-items: center;
+      gap: 22px;
+      width: 100%;
+    }
+
+    .eyebrow {
+      font-family: ui-sans-serif, system-ui, -apple-system, "PingFang SC", sans-serif;
+      font-size: 12px;
+      letter-spacing: .34em;
+      text-transform: uppercase;
+      color: var(--accent-dark);
+      font-weight: 800;
+    }
+
+    .back .eyebrow { color: #f4c8a2; }
+
+    .word {
+      margin: 0;
+      font-size: clamp(54px, 12vw, 100px);
+      line-height: 1.05;
+      letter-spacing: .12em;
+      text-indent: .12em;
+      font-weight: 900;
+      text-wrap: balance;
+    }
+
+    .definition {
+      margin: 0;
+      max-width: 32em;
+      font-size: clamp(19px, 4vw, 30px);
+      line-height: 1.7;
+      letter-spacing: .04em;
+      text-wrap: pretty;
+    }
+
+    .hint {
+      position: absolute;
+      z-index: 2;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: ui-sans-serif, system-ui, -apple-system, "PingFang SC", sans-serif;
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: .12em;
+      white-space: nowrap;
+    }
+
+    .back .hint { color: rgba(247,241,229,.64); }
+
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    button {
+      appearance: none;
+      border: 0;
+      border-radius: 16px;
+      min-height: 58px;
+      padding: 14px 24px;
+      font: 800 17px/1 ui-sans-serif, system-ui, -apple-system, "PingFang SC", sans-serif;
+      letter-spacing: .08em;
+      color: white;
+      background: var(--accent);
+      box-shadow: 0 9px 0 var(--accent-dark), 0 14px 28px rgba(169,46,32,.22);
+      cursor: pointer;
+      transition: transform .13s ease, box-shadow .13s ease, filter .13s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    button:hover { filter: brightness(1.035); transform: translateY(-1px); }
+    button:active { transform: translateY(7px); box-shadow: 0 2px 0 var(--accent-dark), 0 5px 12px rgba(169,46,32,.18); }
+    button:focus-visible { outline: 4px solid rgba(216, 76, 53, .25); outline-offset: 3px; }
+
+    footer {
+      text-align: center;
+      color: var(--muted);
+      font: 12px/1.6 ui-sans-serif, system-ui, -apple-system, "PingFang SC", sans-serif;
+      padding: 2px 8px 0;
+    }
+
+    .swap-out .front .face-content,
+    .swap-out .back .face-content { animation: swap .25s ease both; }
+
+    @keyframes swap {
+      0% { opacity: 1; transform: translateY(0) scale(1); }
+      100% { opacity: 0; transform: translateY(-8px) scale(.985); }
+    }
+
+    @media (max-width: 520px) {
+      body { padding-left: 14px; padding-right: 14px; }
+      .shell { gap: 16px; }
+      .card { min-height: 430px; aspect-ratio: auto; }
+      .face { padding: 42px 27px 58px; border-radius: 22px; }
+      .word { font-size: clamp(48px, 17vw, 72px); }
+      .definition { font-size: 20px; line-height: 1.75; }
+      header { align-items: center; }
+      .subtitle { display: none; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .card, button { transition: none; }
+      .swap-out .face-content { animation: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <div class="brand">
+        <h1>瞎掰王</h1>
+        <p class="subtitle">一个词，随便掰；翻过来，看看它到底是什么。</p>
+      </div>
+      <p class="count" id="count">原创词库</p>
+    </header>
+
+    <section class="stage" aria-live="polite">
+      <div class="card" id="card" role="button" tabindex="0" aria-label="点击查看释义" aria-pressed="false">
+        <article class="face front">
+          <div class="face-content">
+            <span class="eyebrow" id="kindFront">随机词语</span>
+            <h2 class="word" id="word">雾羽症</h2>
+          </div>
+          <span class="hint">点击卡片 · 查看释义</span>
+        </article>
+
+        <article class="face back">
+          <div class="face-content">
+            <span class="eyebrow" id="kindBack">释义</span>
+            <p class="definition" id="definition"></p>
+          </div>
+          <span class="hint">再次点击 · 返回词语</span>
+        </article>
+      </div>
+    </section>
+
+    <div class="controls">
+      <button id="next" type="button">换一个词</button>
+    </div>
+
+    <footer>全部词条均为原创虚构，仅供聚会游戏与即兴瞎掰。</footer>
+  </main>
+
+  <script>
+    (() => {
+      'use strict';
+
+      const prefixes = [
+        '雾','盐','铜','纸','月','逆','灰','弦','潮','砂','绒','空',
+        '静','偏','冷','微','盲','折','迟','野','瓷','影','霜','眠',
+        '夜','蓝','锈','云','蜡','哑','浮','镜','旧','软','裂','星'
+      ];
+
+      const cores = [
+        '羽','钟','骨','灯','桥','舌','环','谷','鳞','井','脊','门',
+        '砂','耳','舟','枝','壳','纹','轴','泉','幕','轮','塔','笛'
+      ];
+
+      const suffixes = ['症','律','法','仪','兽','草','效应','习俗'];
+
+      const places = [
+        '北方沿海渔村','旧式矿区','高原驿站','南方雨林边缘','群岛灯塔区','内陆盐湖附近',
+        '早期铁路工棚','山地集市','荒漠商路','河口湿地','寒带木屋聚落','地下水渠城市'
+      ];
+
+      const conditions = [
+        '连续三天睡眠不足','气压突然下降','长时间听见重复节拍','在陌生房间醒来','黄昏后独自赶路',
+        '盯着缓慢旋转的物体','闻到潮湿木头的气味','短时间内反复改变决定','在强风里大声说话',
+        '刚结束一场没有结论的争论','手里同时拿着两件相似物品','等待一个迟迟不来的消息'
+      ];
+
+      const objects = [
+        '远处的窗户','自己的脚步声','尚未发生的对话','静止的影子','别人没说出口的后半句话','房间里最轻的物品',
+        '刚刚忘掉的名字','重复出现的数字','墙角的微弱反光','门外并不存在的脚步','手边熟悉的工具','一段普通旋律'
+      ];
+
+      const mistaken = [
+        '某种预兆','来自童年的记忆','别人发出的暗号','时间倒退的证据','一条必须立刻遵守的指令','附近天气改变的信号',
+        '自己曾经做过的承诺','另一个人正在模仿自己','物体即将消失的征兆','一场梦尚未结束的证明','好运正在转移的标记','语言失效前的警告'
+      ];
+
+      const fields = [
+        '航海','钟表修理','民间气象','舞台管理','旧式印刷','驯兽','夜间巡逻','建筑测绘',
+        '集市交易','长途邮递','酿造','山地放牧'
+      ];
+
+      const qualities = ['整齐','安静','精确','缓慢','明亮','对称','轻巧','复杂','稳定','接近完成','容易解释','看似合理'];
+      const outcomes = ['容易被忽略','更可能出错','越难被记住','越会引发争论','反而需要更久确认','越容易被当成偶然','越难在第二天复现','越可能被高估','越会让旁观者不安','越容易产生相反结果','越不适合立刻使用','越可能在最后一步失败'];
+
+      const tools = ['一根打结的细绳','两只不同大小的杯子','带缺口的木尺','一面蒙雾的小镜子','三枚颜色不同的石子','一张反复折叠的纸',
+        '没有刻度的沙漏','一支两头都削尖的铅笔','一只空盒和一枚纽扣','四段长度相同的线','一盏只能调暗的灯','一块边缘磨圆的薄木板'];
+
+      const purposes = ['判断陌生人是否在说谎','让犹豫的人迅速做出选择','估算一段路实际有多远','找回被打断的话题','决定物品应该放在哪一侧','让一群人同时安静下来',
+        '测试一个计划是否过于复杂','在没有钟表时估计时间','区分巧合与真正的规律','把坏消息说得稍微容易接受','确认房间里谁最先走神','判断一件事是否值得再试一次'];
+
+      const materials = ['压制软木','磨砂铜片','多层油纸','盐浸藤条','烧黑陶片','空心骨管','蜡封细线','旧玻璃碎片','羊毛与树脂','薄铁皮','干燥芦苇','层叠桦树皮'];
+
+      const instrumentEffects = ['在空气湿度改变时发出轻响','会把附近最弱的声音放大','只能在无人注视时显示刻度','遇到谎话时表面会暂时起雾','会随使用者犹豫程度轻微偏转','能记录一间屋子里最后消失的声音',
+        '在方向判断错误时产生温差','可把十分钟的等待感压缩成一分钟','会让相同颜色看起来略有差异','能显示某物被移动过几次','可测出一句话被重复的可能性','在附近有人改口时轻轻震动'];
+
+      const habitats = ['废弃钟楼的夹层','海风吹不到的礁洞','生长低矮灌木的石坡','旧仓库屋檐下','地下水渠的干燥段','盐碱地边缘',
+        '冬季封闭的果园','高山缆车塔架附近','长期无人使用的阁楼','潮汐刚刚退去的泥滩','铁路隧道入口','城市最早亮灯的屋顶'];
+
+      const animalTraits = ['只在听见名字被叫错时活动','习惯把发亮的小物件排成直线','受惊后会模仿附近最短的一句话','会沿着自己的脚印倒着走','每天只进食一种颜色的食物','用尾部敲击物体来判断是否安全',
+        '遇到镜面会立即闭眼','会在雨前把巢口朝向相反方向','从不穿过完全对称的空间','通过改变呼吸节奏隐藏自己','擅长偷走没有被记住的东西','会把陌生声音带回巢中反复播放'];
+
+      const terrains = ['石缝','背阴墙根','潮湿木桩','旧瓦片之间','河岸细砂','废弃花盆','盐碱浅坑','高原碎石坡','林间腐木','屋顶排水槽','洞穴入口','结霜草地'];
+      const plantTraits = ['叶片会在有人撒谎时向内卷曲','开花前会散发类似旧书的气味','根部能储存附近最后一次雷声的震动','只在影子比植株更短时生长','种子遇到笑声会短暂发热','夜间会把叶尖转向最近的门',
+        '折断后断面会出现同心圆状文字','雨后会长出一片颜色相反的新叶','靠吸收金属表面的微量锈迹生长','花瓣数量总比观察者数多一片','会在无人经过时缓慢移动几厘米','枯萎前会发出一次清脆的裂响'];
+
+      const phenomena = ['人们会同时高估刚刚听见的数字','一个决定越晚宣布，越像是早已决定','越熟悉的路线越容易少记住一个转弯','重复三次的错误会被误认为规则','越想保持安静，越会注意到细小噪声','两件相似物品并排时，其中一件会显得更旧',
+        '等待中的人会把普通动作理解成信号','解释越完整，听者越容易忘记最初的问题','一个名字被写下后会显得比读出来更可信','人群越大，最先提出的错误越难纠正','越接近截止时间，简单任务越像复杂任务','同一句话从门外传来时会显得更重要'];
+
+      const customsActions = ['把第一杯水倒回壶里','进门前轻敲左侧门框三次','将当天说错的第一个名字写在纸角','吃饭前交换两次座位','在出发时故意留下一个不重要的物件','把收到的好消息隔一刻钟再说',
+        '在雨停后把窗户重新关一次','谈判结束时数清桌上的杯子','搬家前先在空房间里讲一个旧笑话','第一次见面时避免询问准确时间','夜里回家后把鞋尖朝向不同方向','做决定前先说出一个明显错误的选项'];
+
+      const customReasons = ['据说这样能防止好运被过早用完','当地人认为这可以让坏消息找错对象','传统解释是让旅途中的犹豫留在原地','据说能避免第二天重复同一个错误','老人们认为这会让陌生人更容易说真话','当地传说这样可以把争吵限制在当天',
+        '据说能让失物记住回来的方向','人们相信这会使仓促的决定自动变慢','传统上用来区分真正的承诺与客套话','据说可以避免梦境跟着人走出房间','当地人认为这样能让天气少管闲事','传说它能让一句话只产生一次误会'];
+
+      const kindLabels = {
+        '症': '罕见现象',
+        '律': '经验定律',
+        '法': '古怪方法',
+        '仪': '失传器具',
+        '兽': '虚构生物',
+        '草': '奇异植物',
+        '效应': '心理效应',
+        '习俗': '地方习俗'
+      };
+
+      function hashText(text) {
+        let h = 2166136261;
+        for (let i = 0; i < text.length; i++) {
+          h ^= text.charCodeAt(i);
+          h = Math.imul(h, 16777619);
+        }
+        return h >>> 0;
+      }
+
+      function pick(list, h, salt) {
+        const mixed = (h ^ Math.imul(salt + 1, 2654435761)) >>> 0;
+        return list[mixed % list.length];
+      }
+
+      function buildDefinition(prefix, core, suffix) {
+        const term = prefix + core + suffix;
+        const h = hashText(term);
+
+        if (suffix === '症') {
+          return `一种在${pick(conditions,h,1)}后出现的短暂认知偏差。患者会把${pick(objects,h,2)}误认为${pick(mistaken,h,3)}，通常在睡一觉后自行消失。`;
+        }
+        if (suffix === '律') {
+          return `${pick(fields,h,4)}从业者总结出的经验规律：一件事越${pick(qualities,h,5)}，它就${pick(outcomes,h,6)}。最早见于${pick(places,h,7)}的口述记录。`;
+        }
+        if (suffix === '法') {
+          return `一种起源于${pick(places,h,8)}的判断方法。使用${pick(tools,h,9)}来${pick(purposes,h,10)}，关键步骤必须在旁观者开口前完成。`;
+        }
+        if (suffix === '仪') {
+          return `用${pick(materials,h,11)}制成的小型器具，原用于${pick(fields,h,12)}。它${pick(instrumentEffects,h,13)}，但连续使用三次后必须静置一晚。`;
+        }
+        if (suffix === '兽') {
+          return `栖息在${pick(habitats,h,14)}附近的小型夜行动物。它${pick(animalTraits,h,15)}，因此过去常被误认为某种恶作剧留下的痕迹。`;
+        }
+        if (suffix === '草') {
+          return `生长在${pick(terrains,h,16)}中的低矮植物。它${pick(plantTraits,h,17)}，当地人通常不把它移栽到室内。`;
+        }
+        if (suffix === '效应') {
+          return `一种群体判断偏差：${pick(phenomena,h,18)}。当参与者彼此熟悉时，这种现象反而更明显。`;
+        }
+        return `${pick(places,h,19)}流传的旧习：${pick(customsActions,h,20)}。${pick(customReasons,h,21)}。`;
+      }
+
+      const dictionary = [];
+      for (const prefix of prefixes) {
+        for (const core of cores) {
+          for (const suffix of suffixes) {
+            dictionary.push({
+              word: prefix + core + suffix,
+              kind: kindLabels[suffix],
+              definition: buildDefinition(prefix, core, suffix)
+            });
+          }
+        }
+      }
+
+      const card = document.getElementById('card');
+      const word = document.getElementById('word');
+      const definition = document.getElementById('definition');
+      const kindFront = document.getElementById('kindFront');
+      const kindBack = document.getElementById('kindBack');
+      const next = document.getElementById('next');
+      const count = document.getElementById('count');
+
+      count.textContent = `${dictionary.length.toLocaleString('zh-CN')} 个原创词条`;
+
+      let bag = [];
+      let currentIndex = -1;
+
+      function refillBag() {
+        bag = Array.from({ length: dictionary.length }, (_, i) => i);
+        for (let i = bag.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [bag[i], bag[j]] = [bag[j], bag[i]];
+        }
+        if (bag.length > 1 && bag[bag.length - 1] === currentIndex) {
+          [bag[bag.length - 1], bag[bag.length - 2]] = [bag[bag.length - 2], bag[bag.length - 1]];
+        }
+      }
+
+      function showNext() {
+        if (!bag.length) refillBag();
+        card.classList.add('swap-out');
+        setTimeout(() => {
+          currentIndex = bag.pop();
+          const entry = dictionary[currentIndex];
+          card.classList.remove('is-flipped');
+          card.setAttribute('aria-pressed', 'false');
+          card.setAttribute('aria-label', `词语：${entry.word}。点击查看释义`);
+          word.textContent = entry.word;
+          definition.textContent = entry.definition;
+          kindFront.textContent = entry.kind;
+          kindBack.textContent = `${entry.kind} · 释义`;
+          card.classList.remove('swap-out');
+        }, 180);
+      }
+
+      function flipCard() {
+        const flipped = card.classList.toggle('is-flipped');
+        card.setAttribute('aria-pressed', String(flipped));
+        card.setAttribute('aria-label', flipped ? '正在显示释义。再次点击返回词语' : `词语：${word.textContent}。点击查看释义`);
+      }
+
+      card.addEventListener('click', flipCard);
+      card.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          flipCard();
+        }
+      });
+
+      next.addEventListener('click', showNext);
+      document.addEventListener('keydown', (event) => {
+        if (event.key.toLowerCase() === 'r' || event.key === 'ArrowRight') showNext();
+      });
+
+      refillBag();
+      showNext();
+    })();
+  </script>
+</body>
+</html>
